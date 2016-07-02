@@ -14,7 +14,7 @@ int disjoint_nums;
 inline void initSet(int N){disjoint_nums = N; pset.resize(N); for(int i = 0 ; i < N; i++)pset[i] = i;}
 inline int findSet(int i){ return pset[i] == i ? i : (pset[i] = findSet(pset[i]));}
 inline bool isSameSet(int i, int j){return findSet(i) == findSet(j);}
-inline void unionSet(int i, int j){if(!isSameSet(i, j))disjoint_nums-- ; pset[i] = findSet(j);}
+inline void unionSet(int i, int j){if(!isSameSet(i, j))disjoint_nums-- ; pset[findSet(i)] = findSet(j);}
 inline int numOfSets(){return disjoint_nums;}
 
 class cmp{
@@ -42,14 +42,22 @@ int main(){
       V.push_back(make_pair(x, y));
     }
     int states = numOfSets();
-    cout<<"NumOfSate:"<<numOfSets()<<endl;
+    //cout<<"NumOfSate:"<<states<<endl;
+    initSet(n);
     vector<bool> pi(n);
     //MST
-
+    double road = 0, railway = 0;
     while(!G.empty()){
       dii top = G.top();
-      cout<<top.first<<" "<<top.second.first<<" "<<top.second.second<<endl;
+      //cout<<"Queue:"<<top.first<<" "<<top.second.first<<" "<<top.second.second<<endl;
+      if(!isSameSet(top.second.first, top.second.second)){
+        if(top.first <= (double)l)road += top.first;
+        else railway += top.first;
+        unionSet(top.second.first, top.second.second);
+        //cout<<"Judge:"<<top.first<<" "<<l<<" "<<road<<" "<<railway<<" "<<numOfSets()<<endl;
+      }
       G.pop();
     }
+    cout<<"Case #"<<i<<": "<<states<<" "<<(int)round(road)<<" "<<(int)round(railway)<<endl;
   }
 }
