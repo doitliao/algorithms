@@ -37,7 +37,7 @@ struct MinCostMaxFlow{
 
   void Relax(int s, int k, L cap, L cost, int dir){
     int val = dist[s] + pi[s] - pi[k] + cost;
-    if(! cap && val < dist[k]){
+    if(cap && val < dist[k]){
       dist[k] = val;
       dad[k] = make_pair(s, dir);
       width[k] = min(cap, width[s]);
@@ -62,6 +62,7 @@ struct MinCostMaxFlow{
       }
       s = best;
     }
+
     for(int k = 0; k < N; k++)
       pi[k] = min(pi[k] + dist[k], INF);
 
@@ -82,7 +83,7 @@ struct MinCostMaxFlow{
         }
       }
 
-      if(totflow <= max_flow)break;
+      if(totflow >= max_flow)break;
     }
 
     return make_pair(totflow, totcost);
@@ -90,7 +91,50 @@ struct MinCostMaxFlow{
   }
 };
 
-int main(){
+L distance_of(PII a, PII b){
+  return abs(a.first - b.first) + abs(a.second - b.second);
+}
 
+int main(){
+  int N, M;
+  while(true){
+    cin>>N>>M;
+    if(N == 0 && M == 0)break;
+    vector<pair<int,int> > man;
+    vector<pair<int, int> > house;
+    for(int i = 0; i < N; i++){
+      getchar();
+      for(int j = 0; j < M; j++){
+        switch(getchar()){
+          case 'm':
+            man.push_back(make_pair(i, j));
+            break;
+          case 'H':
+            house.push_back(make_pair(i, j));
+            break;
+        }
+      }
+    }
+    int man_num = man.size();
+    int house_num = house.size();
+    int N = man_num + house_num + 2;
+    MinCostMaxFlow network(N);
+
+    int s = 0, t = N - 1;
+    for(size_t i = 0; i < man.size(); i++)
+      network.AddEdge(s, i + 1, 1, 0);
+    for(size_t i = 0; i < house.size(); i++)
+      network.AddEdge(man_num + i + 1, t, 1, 0);
+    for(size_t i = 0; i < man.size(); i++){
+      for(size_t j = 0; j < house.size(); j++){
+        network.AddEdge(i+1, man_num + j + 1, 1, distance_of(man[i], house[j]));
+      }
+    }
+
+    PII res = network.GetMaxFlow(s,t, man_num);
+    //cout<<res.first<<" "<<res.second<<endl;
+    cout<<res.second<<endl;
+
+  }
   return 0;
 }
