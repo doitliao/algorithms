@@ -68,7 +68,7 @@ struct Dinic {
         if(!e){amt = 0; break;}
         amt = min(amt, e->cap - e->flow);
       }
-      if(amt == 0)break;
+      if(amt == 0)continue;
       for(Edge *e = start; amt && e != dad[s]; e = dad[e->from]){
         e->flow += amt;
         G[e->to][e->index].flow -= amt;
