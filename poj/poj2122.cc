@@ -70,6 +70,7 @@ struct MinCostMaxFlow{
 
   pair<L, L> GetMaxFlow(int s, int t, L max_flow = INF){
     L totflow = 0, totcost = 0;
+    L maxcost = 0;
     while(L amt = Dijkstra(s, t)){
       totflow += amt;
       for( int x = t; x != s; x = dad[x].first){
@@ -81,16 +82,48 @@ struct MinCostMaxFlow{
           totcost -= amt * cost[x][dad[x].first];
         }
       }
-
       if(totflow >= max_flow)break;
     }
 
     return make_pair(totflow, totcost);
+  }
 
+  L GetMaxCostPath(){
+    for(int i = 0; i < N; ++i)
+      for(int j = 0; j < N; ++j){
+        if(flow[i][j] > 0){
+          cout<<i<<" "<<j<<" "<<flow[i][j]<<endl;
+        }
+      }
+    return 0;
   }
 };
 
 int main(){
+  int K, C, M;
+  cin>>K>>C>>M;
+  int N = K + C + 2;
+  MinCostMaxFlow net(N);
+  int s = 0, t = N - 1;
+  for(int i = 1; i <= K; ++i)
+    net.AddEdge(i, t, M, 0);
+  for(int i = 1; i <= C; ++i)
+    net.AddEdge(s, K + i, 1, 0);
+
+  N = K + C;
+  int d;
+  for(int i = 1; i <= N; i++)
+    for(int j = 1; j <= N; j++){
+      cin>>d;
+      if(i < j && d > 0){
+        net.AddEdge(i, j, INF, d);
+        net.AddEdge(j, i, INF, d);
+      }
+    }
+
+  PII res = net.GetMaxFlow(s, t, C);
+  cout<<res.first<<" "<<res.second<<endl;
+  cout<<net.GetMaxCostPath()<<endl;
 
   return 0;
 }
