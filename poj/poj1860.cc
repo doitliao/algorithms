@@ -36,31 +36,61 @@ struct ExchangeSystem{
     G[to].push_back(Edge(to, from, G[from].size() - 1, r2, c2));
   }
 
-  bool CanWealther(int s, LLD c){
-    fill(visited.begin(), visited.end(), false);
-    //fill(currency.begin(), currency.end(), 0);
-    int head = 0, tail = 0;
-    Q[tail++] = s;
+  bool bellman_ford(int s, LLD c){
+    fill(currency.begin(), currency.end(), 0);
     currency[s] = c;
-    visited[s] = true;
-    while(head < tail){
-      assert(tail <= N);
-      int x = Q[head++];
-      assert(x < N && x >=0);
-      for(size_t i = 0; i < G[x].size(); ++i){
-        Edge &e = G[x][i];
-        if(visited[e.to]){
-          if(((currency[x] - e.commision) * e.rate - currency[e.to]) > 1e-10){
-            return true;
+    for(int i = 0; i < N; i++){
+      bool flag = false;
+      for(int i = 0; i < N; i++){
+        for(size_t j = 0; j < G[i].size(); ++j){
+          Edge & e = G[i][j];
+          double val = (currency[e.from] - e.commision) * e.rate;
+          if((val - currency[e.to]) > 1e-10){
+            currency[e.to] = val;
+            flag = true;
           }
-        }else{
-          currency[e.to] = (currency[x] - e.commision) * e.rate;
-          visited[e.to] = true;
-          Q[tail++] = e.to;
+        }
+      }
+      if(!flag)break;
+    }
+    for(int i = 0; i < N; i++){
+      for(size_t j = 0; j < G[i].size(); ++j){
+        Edge & e = G[i][j];
+        double val = (currency[e.from] - e.commision) * e.rate;
+        if((val - currency[e.to]) > 1e-10){
+          return true;
         }
       }
     }
     return false;
+  }
+
+  bool dfs(int x, LLD c){
+    currency[x] = c;
+    visited[x] = true;
+    for(size_t i = 0; i < G[x].size(); ++i){
+      Edge &e = G[x][i];
+      LLD next = (currency[x] - e.commision) * e.rate;
+      if(next < 1e-10)continue;
+      if(visited[e.to]){
+        if((next - currency[e.to]) > 1e-10){
+          return true;
+        }
+      }else{
+        bool can = dfs(e.to, next);
+        if(!can)continue;
+        return true;
+      }
+    }
+    currency[x] = 0;
+    visited[x] = false;
+    return false;
+  }
+
+  bool CanWealther(int s, LLD c){
+    fill(visited.begin(), visited.end(), false);
+    fill(currency.begin(), currency.end(), 0);
+    return dfs(s, c);
   }
 };
 
@@ -75,6 +105,7 @@ int main(){
     cin>>from>>to>>r1>>c1>>r2>>c2;
     net.AddEdge(from - 1, to - 1, r1, c1, r2, c2);
   }
-  cout<<(net.CanWealther(S, V)?"YES":"NO")<<endl;
+  cout<<(net.CanWealther(S - 1, V)?"YES":"NO")<<endl;
+  //cout<<(net.bellman_ford(S - 1, V)?"YES":"NO")<<endl;
   return 0;
 }
