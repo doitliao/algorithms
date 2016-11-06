@@ -53,8 +53,25 @@ struct BellmanFord{
 };
 
 int main(){
-  int N = 10;
-  BellmanFord net(N);
-  cout<<(net.Run()?"NO":"YES")<<endl;
+  int t, M, N, W;
+  int s,e;
+  LLD w;
+  cin>>t;
+  while(t--){
+    cin>>N>>M>>W;
+    BellmanFord net(N);
+    while(M--){
+      cin>>s>>e>>w;
+      s--;e--;
+      net.AddEdge(s, e, w);
+      net.AddEdge(e, s, w);
+    }
+    while(W--){
+      cin>>s>>e>>w;
+      s--;e--;
+      net.AddEdge(s, e, -w);
+    }
+    cout<<(net.Run()?"NO":"YES")<<endl;
+  }
   return 0;
 }
