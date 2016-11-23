@@ -45,22 +45,20 @@ class Knight{
       g[x][y] += check(x, y, M, N);
       if(M != N)
         g[x][y] += check(x, y, N, M);
+      if(g[x][y] & 1)odd++;
+      else even++;
     }
 
     void do_knight(){
+      even = 0;
+      odd = 0;
       dfs(0, 0);
-      int even = 0, odd = 0;
-      for(int i = 0; i < R; i++)
-        for(int j = 0; j < C; j++){
-          if(g[i][j] < 0)continue;
-          if(g[i][j]&1)odd++;
-          else even++;
-        }
       cout<<even<<" "<<odd<<endl;
     }
 
   private:
     int R,C,M,N;
+    int even,odd;
     vector<vector<int> > g;
     vector<vector<bool> > v;
 };
