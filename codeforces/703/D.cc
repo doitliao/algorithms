@@ -1,6 +1,8 @@
 //#include <bits/stdc++.h>
 #include <iostream>
 #include <vector>
+#include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -14,11 +16,10 @@ public:
       bitMax <<= 1;
       idx >>= 1;
     }
-    //MaxVal(bitMax);
   }
   void update(int idx, int val){
     while(idx <= MaxVal){
-      tree[idx] += val;
+      tree[idx] ^= val;
       idx += (idx & -idx);
     }
   }
@@ -26,14 +27,14 @@ public:
   T sum(int idx){
     T s = 0;
     while(idx > 0){
-      s += tree[idx];
+      s ^= tree[idx];
       idx -= (-idx & idx);
     }
     return s;
   }
   
   T query(int l, int r){
-    return sum(r) - sum(l - 1);  
+    return sum(r) ^ sum(l - 1);  
   }
 
   T get(int idx){
@@ -117,19 +118,35 @@ public:
 };
 
 int main(){
-  Fenwick f(21);
-  for(int i = 1; i < 10; i++){
-    f.update(i, i);
+  int n,m;
+  cin>>n;
+  vector<int> a(n + 1);
+  Fenwick f(n);
+  for(int i = 1; i <= n; i++){
+    scanf("%d", &a[i]);
   }
-  f.update(10,0);
+  cin>>m;
+  vector<vector<pair<int, int> > > q(n + 1);
+  int l,r;
+  for(int i = 0; i < m; i++){
+    scanf("%d%d", &l, &r);
+    q[r].push_back(make_pair(l, i));
+  }
+  
+  vector<int> ans(m);
+  unordered_map<int, int> last;
+  for(int i = 1; i <= n; i++){
+    if(last.find(a[i]) != last.end())
+      f.update(last[a[i]], a[i]);
 
-  cout<<f.sum(10)<<endl;
-  cout<<f.sum(9)<<endl;
-  for(int i = 1; i <= 10; i++){
-    cout<<"Find: "<<f.find(i)<<endl;
+    last[a[i]] = i;
+    f.update(i, a[i]);
+    a[i] ^= a[i-1];
+    for(int j = 0; j < q[i].size(); j++){
+      ans[q[i][j].second] = a[i] ^ a[q[i][j].first -1] ^ f.sum(i) ^ f.sum(q[i][j].first -1);
+    }
   }
-  cout<<f.find(45)<<endl;
-  cout<<f.findG(45)<<endl;
-  cout<<f.query(3, 6)<<endl;
+  for(int i = 0; i < m; i++)
+    printf("%d\n", ans[i]);
   return 0;
 }
