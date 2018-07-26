@@ -1,0 +1,88 @@
+#include <iostream>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+
+class UFset{
+public:
+	UFset(int n):N(n){initSet(n);}
+	vector<int> cost;
+	int N;
+
+	vector<int> pset;
+	int numOfSet = 0;
+	void initSet(int size){
+  	pset.resize(size);
+		cost.resize(size);
+  	numOfSet = size; 
+  	for(int i = 0; i < size; i++)
+		{
+			pset[i] = i;
+		}
+	}
+
+	int findSet(int i){ 
+  	return pset[i] == i? i: (pset[i] = findSet(pset[i]));
+	}	
+
+	bool isSameSet(int i, int j){return findSet(i) == findSet(j);}
+	void unionSet(int i, int j){
+  	if(!isSameSet(i, j))numOfSet--; 
+		int x  = findSet(i);
+		cost[findSet(j)] = min(cost[findSet(i)], cost[findSet(j)]);
+  	pset[findSet(i)] = findSet(j);
+	}
+
+	int numberOfSets(){return numOfSet;}
+};
+
+int main()
+{
+  int n,k, m;
+  cin>>n>>k>>m;
+  UFset uf(n);
+  char str[30];
+  map<string, int> lexcon;
+  for(int i = 0; i < n; i++){
+    scanf("%s", str);
+    lexcon[str] = i;
+  }
+  
+  unsigned c;
+  for(int i = 0; i < n; i++){
+    scanf("%u", &c);
+    uf.cost[i] = c;
+  }
+
+  for(int i = 0; i < k; i++){
+    int x, y;
+    scanf("%d", &x);
+    int prev = -1;
+    for(int j = 0; j < x; j++){
+      scanf("%d", &y);
+      y--;
+      if(j != 0){
+	uf.unionSet(prev, y);
+      }
+      prev = y;
+    }
+  }
+  
+  unsigned cost = 0;
+  for(int i = 0; i < m; i++){
+    scanf("%s", str);
+    cost += uf.cost[uf.findSet(lexcon[str])];
+  }
+  cout<<cost<<endl;
+/*
+  initSet(5);
+  cout<<isSameSet(2, 4)<<endl;
+  unionSet(1,2);
+  unionSet(4, 5);
+  unionSet(1, 5);
+  cout<<isSameSet(2, 4)<<endl;
+  cout<<numberOfSets()<<endl;
+*/
+}
